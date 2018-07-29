@@ -1,10 +1,14 @@
 package hackerthon.camera;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.TextView;
+
+import java.util.ArrayList;
 
 import static android.R.attr.data;
 
@@ -14,40 +18,46 @@ import static android.R.attr.data;
 
 public class ListViewAdpter extends BaseAdapter {
     private LayoutInflater inflater;
-    private int icon;
-    private String name;
+    private ArrayList<ViewItem> data;
 
-    public ListViewAdpter(Context context, int layout){
+    private int layout;
+
+    public ListViewAdpter(Context context, int layout, ArrayList<ViewItem> data){
         this.inflater=(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-    }
-
-    public int getIcon() {
-        return icon;
-    }
-
-    public String getName() {
-        return name;
+        this.layout = layout;
+        this.data = data;
     }
 
     @Override
     public int getCount() {
-        return 0;
+        return data.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return null;
+        return data.get(i);
     }
 
     @Override
     public long getItemId(int i) {
-        return 0;
+        return i;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent){
+        if(convertView == null){
+            convertView = inflater.inflate(layout, parent, false);
+        }
+        ViewItem listviewitem= data.get(position);
 
+        TextView name = (TextView)convertView.findViewById(R.id.name);
+        name.setText(listviewitem.getName());
+        TextView start = (TextView) convertView.findViewById(R.id.start);
+        start.setText(listviewitem.getStart());
+        TextView end = (TextView) convertView.findViewById(R.id.end);
+        end.setText(listviewitem.getEnd());
+        TextView pos = (TextView) convertView.findViewById(R.id.position);
+        pos.setText(listviewitem.getPosition());
 
         return convertView;
     }
