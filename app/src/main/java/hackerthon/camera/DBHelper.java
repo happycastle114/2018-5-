@@ -4,6 +4,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Log;
 
@@ -43,7 +46,7 @@ public class DBHelper extends SQLiteOpenHelper {
         /* 이름은 MONEYBOOK이고, 자동으로 값이 증가하는 _id 정수형 기본키 컬럼과
         item 문자열 컬럼, price 정수형 컬럼, create_at 문자열 컬럼으로 구성된 테이블을 생성. */
         db.execSQL("CREATE TABLE FOOD_INFO (_id INTEGER PRIMARY KEY AUTOINCREMENT,  kcal INTEGER ,protin INTEGER, fat INTEGER, cal INTEGER, na INTEGER, ca INTEGER, fe INTEGER);");
-        db.execSQL("CREATE TABLE STUFF_INFO (_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, type TEXT, start TEXT, end TEXT, position TEXT, image TEXT, gotoid INTEGER);");
+        db.execSQL("CREATE TABLE STUFF_INFO (_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, type TEXT, start TEXT, end TEXT, position TEXT, image BLOB, gotoid INTEGER);");
     }
     // DB 업그레이드를 위해 버전이 변경될 때 호출되는 함수
     @Override
@@ -58,7 +61,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("INSERT INTO FOOD_INFO VALUES(null, " + kcal + "," + protin + ", " + fat + ", " + cal + ", " + na + "," + ca + ", " + fe + ");");
         db.close();
     }
-    public void insert(String name, String type, String date, String position, Uri image)
+    public void insert(String name, String type, String date, String position, byte[] image)
     {
         SQLiteDatabase db = getWritableDatabase();
         long now = System.currentTimeMillis();
@@ -66,9 +69,13 @@ public class DBHelper extends SQLiteOpenHelper {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         String getTime = sdf.format(a);
+        SQLiteStatement p = db.compileStatement("INSERT INTO STUFF_INFO VALUES(null, '"+name+"', '"+type+"','"+getTime+"','"+date+"','"+position+"',?,"+0+");");
+        Log.d("compilie: ","INSERT INTO STUFF_INFO VALUES(null, '"+name+"', '"+type+"','"+getTime+"','"+date+"','"+position+"',?,"+0+");");
 
+        p.bindBlob(1,image);
+        p.execute();
         //db.execSQL("CREATE TABLE STUFF_INFO (_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, type TEXT, start DATE, end DATE, position TEXT, image TEXT");
-        db.execSQL("INSERT INTO STUFF_INFO VALUES(null, '"+name+"', '"+type+"','"+getTime+"','"+date+"','"+position+"','"+image+"',"+0+");");
+        //db.execSQL("INSERT INTO STUFF_INFO VALUES(null, '"+name+"', '"+type+"','"+getTime+"','"+date+"','"+position+"','"+image+"',"+0+");");
         db.close();
     }
 
@@ -111,7 +118,7 @@ public class DBHelper extends SQLiteOpenHelper {
         // DB에 있는 데이터를 쉽게 처리하기 위해 Cursor를 사용하여 테이블에 있는 모든 데이터 출력
         Cursor cursor = db.rawQuery("SELECT * FROM STUFF_INFO;", null);
         while (cursor.moveToNext()) {
-            result.add(new ViewItem(cursor.getInt(0),cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),cursor.getString(5), Uri.parse(cursor.getString(6))));
+            result.add(new ViewItem(cursor.getInt(0),cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),cursor.getString(5),getApplcon(cursor.getBlob(6))));
         }
         db.close();
         return result;
@@ -121,14 +128,20 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM STUFF_INFO WHERE _id="+id+";", null);
 
-        ViewItem result = new ViewItem(0,"","","","","",Uri.parse(""));
+        ViewItem result = null;
         Log.d("cusor: ","Search");
         while (cursor.moveToNext()) {
             Log.d("cusor: ","Search");
-            result = new ViewItem(cursor.getInt(0),cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),cursor.getString(5), Uri.parse(cursor.getString(6)));
+            result = new ViewItem(cursor.getInt(0),cursor.getString(1),cursor.getString(2),cursor.getString(3),cursor.getString(4),cursor.getString(5), getApplcon(cursor.getBlob(6)));
         }
         db.close();
         return result;
     }
+    public Bitmap getApplcon (byte[] b)
+    {
+        Bitmap bitmap = BitmapFactory.decodeByteArray(b,0,b.length);
+        return bitmap;
+    }
+
 
 }

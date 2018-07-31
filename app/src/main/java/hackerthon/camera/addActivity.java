@@ -2,6 +2,11 @@ package hackerthon.camera;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.media.ExifInterface;
 import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -22,6 +27,7 @@ import android.widget.Space;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -51,6 +57,7 @@ public class addActivity extends Activity {
 
     Uri mlmageCaptureUri = Uri.parse("");
 
+    static final int REQUEST_IMAGE_CAPTURE = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,7 +77,8 @@ public class addActivity extends Activity {
         sendimage = (ImageView) findViewById(R.id.sendimage);
         sendimage.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-               dbHelper.insert(name.getText().toString(),spinnerResult, date,position.getText().toString(),mlmageCaptureUri);
+
+               dbHelper.insert(name.getText().toString(),spinnerResult, date,position.getText().toString(),getByteArrayFromDrawble(stuffimage.getDrawable()));
                 Toast.makeText(getApplicationContext(),"생성되었습니다.",Toast.LENGTH_SHORT);
                 Intent intent = new Intent(getApplicationContext(),MainActivity.class);
                 startActivity(intent);
@@ -80,42 +88,10 @@ public class addActivity extends Activity {
         stuffimage = (ImageView) findViewById(R.id.addimage);
         stuffimage.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
-                 String fileName;
-                final String SAVE_FOLDER = "/save_folder";
-                String savePath = Environment.getExternalStorageDirectory().toString() + SAVE_FOLDER;
-                File dir = new File(savePath);
-                if (!dir.exists()) {
-                    dir.mkdirs();
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
                 }
-                fileName =  name.getText()+".jpg";
-
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-                mlmageCaptureUri = Uri.fromFile(new File(savePath, fileName));
-
-                intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, mlmageCaptureUri);
-                startActivityForResult(intent, 0);
-
-
-                fileName = name + ".jpg";
-                Intent i = new Intent(Intent.ACTION_VIEW);
-
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                String targetDir = Environment.getExternalStorageDirectory().toString() + SAVE_FOLDER;
-
-                File file = new File(targetDir + "/" + fileName);
-
-                //type 지정 (이미지)
-
-                i.setDataAndType(Uri.fromFile(file), "image/");
-
-                getApplicationContext().startActivity(i);
-
-                //이미지 스캔해서 갤러리 업데이트
-
-                sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
             }
         });
 
@@ -156,6 +132,28 @@ public class addActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         Log.d("code: ", String.valueOf(resultCode));
-        stuffimage.setImageURI(data.getData());
+
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
+
+            stuffimage.setImageBitmap(imageBitmap);
+
+        }
+    }
+
+    private Bitmap rotate(Bitmap bitmap, float degree) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(degree);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+    }
+    public byte[] getByteArrayFromDrawble(Drawable d)
+    {
+        Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG,100,stream);
+        byte[] data = stream.toByteArray();
+
+        return data;
     }
 }

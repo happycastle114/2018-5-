@@ -25,30 +25,34 @@ public class InfoActivity extends Activity
         int position = intent.getIntExtra("position",0);
 
         final ViewItem listviewitem = DBHelper.instance.getSearch(position);
+        if(listviewitem != null) {
 
+            ImageView image = (ImageView) findViewById(R.id.imageView);
+            image.setImageBitmap(listviewitem.getPicture());
+            TextView name = (TextView) findViewById(R.id.name);
+            name.setText(listviewitem.getName());
+            TextView start = (TextView) findViewById(R.id.start);
+            TextView type = (TextView) findViewById(R.id.type);
+            type.setText(listviewitem.getType());
+            start.setText(listviewitem.getStart());
+            TextView end = (TextView) findViewById(R.id.end);
+            end.setText(listviewitem.getEnd());
+            TextView pos = (TextView) findViewById(R.id.position);
+            pos.setText(listviewitem.getPosition());
+            ImageView delete = (ImageView) findViewById(R.id.remove);
 
-        TextView name = (TextView)findViewById(R.id.name);
-        name.setText(listviewitem.getName());
-        TextView start = (TextView) findViewById(R.id.start);
-        TextView type = (TextView) findViewById(R.id.type);
-        type.setText(listviewitem.getType());
-        start.setText(listviewitem.getStart());
-        TextView end = (TextView) findViewById(R.id.end);
-        end.setText(listviewitem.getEnd());
-        TextView pos = (TextView) findViewById(R.id.position);
-        pos.setText(listviewitem.getPosition());
-        ImageView delete = (ImageView) findViewById(R.id.remove);
+            delete.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    DBHelper.instance.delete(listviewitem.getId());
+                    ((MainActivity) MainActivity.CONTEXT).onResume();
+
+                    finish();
+                }
+            });
+        }
         ImageView backimage = (ImageView) findViewById(R.id.backimage);
         backimage.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                finish();
-            }
-        });
-        delete.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                DBHelper.instance.delete(listviewitem.getId());
-                ((MainActivity)MainActivity.CONTEXT).onResume();
-
                 finish();
             }
         });

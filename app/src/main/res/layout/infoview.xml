@@ -21,7 +21,7 @@
     </LinearLayout>
 
     <ImageView
-        android:id="@+id/imageViewa"
+        android:id="@+id/imageView"
         android:layout_width="360px"
         android:layout_height="360px"
         android:layout_gravity="center_horizontal"

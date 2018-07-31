@@ -1,6 +1,7 @@
 package hackerthon.camera;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 
 /**
@@ -15,9 +16,9 @@ public class ViewItem
     String start;
     String end;
     String position;
-    Uri picture;
+    Bitmap picture;
 
-    ViewItem(int id, String name, String type, String start,String end,String position , Uri picture)
+    ViewItem(int id, String name, String type, String start,String end,String position , Bitmap picture)
     {
         this.id = id;
         this.name = name;
@@ -39,7 +40,7 @@ public class ViewItem
         return start;
     }
 
-    public Uri getPicture()
+    public Bitmap getPicture()
     {
         return picture;
     }

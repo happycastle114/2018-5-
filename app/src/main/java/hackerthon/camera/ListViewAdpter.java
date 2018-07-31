@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -50,6 +51,8 @@ public class ListViewAdpter extends BaseAdapter {
         }
         ViewItem listviewitem= data.get(position);
 
+        ImageView image = (ImageView) convertView.findViewById(R.id.image);
+        image.setImageBitmap(listviewitem.getPicture());
         TextView name = (TextView)convertView.findViewById(R.id.name);
         name.setText(listviewitem.getName());
         TextView start = (TextView) convertView.findViewById(R.id.start);
